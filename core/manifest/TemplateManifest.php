@@ -193,10 +193,11 @@ class SS_TemplateManifest {
 
 		$type = basename(dirname($pathname));
 		$name = strtolower(substr($basename, 0, -3));
-
-		if ($type == self::TEMPLATES_DIR) {
-			$type = 'main';
-		}
+		
+		// Assign one of 3 valid template types: Layout | Includes | main
+		if (strpos($pathname, '/Layout/') !== false) $type = 'Layout';
+		else if (strpos($pathname, '/Includes/') !== false) $type = 'Includes';
+		else $type = 'main';
 
 		if ($theme) {
 			$this->templates[$name]['themes'][$theme][$type] = $pathname;
