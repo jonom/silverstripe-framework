@@ -366,6 +366,42 @@ SS;
 		$this->assertEquals("SubKid1SubKid2Number6",$result, "Loop in current scope works");
 	}
 
+	/**
+	 * Test that we don't get something out of nothing.
+	 */
+	public function testEmptyLoopWith() {
+		// Falsey template values for testing
+		$data = new ArrayData(array(
+			'EmptyList' => new ArrayList(),
+			'False' => false,
+			'Null' => null
+		));
+		
+		$result = $this->render('<% with $Nothing %><p>Something</p><% end_with %>', $data);
+		$this->assertEmpty($result, "Non-existent with not rendered");
+
+		$result = $this->render('<% with $False %><p>Something</p><% end_with %>', $data);
+		$this->assertEmpty($result, "False with not rendered");
+
+		$result = $this->render('<% with $Null %><p>Something</p><% end_with %>', $data);
+		$this->assertEmpty($result, "Null with not rendered");
+		
+		$result = $this->render('<% with $EmptyList %><p>Something</p><% end_with %>', $data);
+		$this->assertEquals("<p>Something</p>", $result, "With on empty list works");
+		
+		$result = $this->render('<% loop $Nothing %><p>Something</p><% end_loop %>', $data);
+		$this->assertEmpty($result, "Non-existent loop not rendered");
+
+		$result = $this->render('<% loop $False %><p>Something</p><% end_loop %>', $data);
+		$this->assertEmpty($result, "False loop not rendered");
+
+		$result = $this->render('<% loop $Null %><p>Something</p><% end_loop %>', $data);
+		$this->assertEmpty($result, "Null loop not rendered");
+		
+		$result = $this->render('<% loop $EmptyList %><p>Something</p><% end_loop %>', $data);
+		$this->assertEmpty($result, "Empty list loop not rendered");
+	}
+
 	public function testObjectDotArguments() {
 		$this->assertEquals(
 			'[out:TestObject.methodWithOneArgument(one)]

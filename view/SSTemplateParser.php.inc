@@ -916,6 +916,7 @@ class SSTemplateParser extends Parser implements TemplateParser {
 		//loop without arguments loops on the current scope
 		if ($res['ArgumentCount'] == 0) {
 			$on = '$scope->obj(\'Up\', null, true)->obj(\'Foo\', null, true)';
+			$if = true; //ToDo - how to test this properly??
 		} else {    //loop in the normal way
 			$arg = $res['Arguments'][0];
 			if ($arg['ArgumentMode'] == 'string') {
@@ -923,12 +924,16 @@ class SSTemplateParser extends Parser implements TemplateParser {
 			}
 			$on = str_replace('$$FINAL', 'obj', 
 				($arg['ArgumentMode'] == 'default') ? $arg['lookup_php'] : $arg['php']);
+			$if = str_replace('$$FINAL', 'hasValue',
+				($arg['ArgumentMode'] == 'default') ? $arg['lookup_php'] : $arg['php']);
 		}
 
+		
 		return
+			'if (' . $if . ') {' .
 			$on . '; $scope->pushScope(); while (($key = $scope->next()) !== false) {' . PHP_EOL .
 				$res['Template']['php'] . PHP_EOL .
-			'}; $scope->popScope(); ';
+			'}; $scope->popScope(); } ';
 	}
 
 	/**
@@ -945,11 +950,13 @@ class SSTemplateParser extends Parser implements TemplateParser {
 			throw new SSTemplateParseException('Control block cant take string as argument.', $this);
 		}
 		
+		$if = str_replace('$$FINAL', 'hasValue', ($arg['ArgumentMode'] == 'default') ? $arg['lookup_php'] : $arg['php']);
 		$on = str_replace('$$FINAL', 'obj', ($arg['ArgumentMode'] == 'default') ? $arg['lookup_php'] : $arg['php']);
 		return 
+			'if (' . $if . ') {' .
 			$on . '; $scope->pushScope();' . PHP_EOL .
 				$res['Template']['php'] . PHP_EOL .
-			'; $scope->popScope(); ';
+			'; $scope->popScope(); } ';
 	}
 	
 	/*!*
