@@ -21,6 +21,8 @@ class DatabaseAdmin extends Controller {
 		'import'
 	);
 
+	protected static $table_build_in_progress = false;
+
 	public function init() {
 		parent::init();
 
@@ -42,6 +44,19 @@ class DatabaseAdmin extends Controller {
 				"This page is secured and you need administrator rights to access it. " .
 				"Enter your credentials below and we will send you right along.");
 		}
+	}
+
+	/**
+	 * Whether or not a build is underway. SQL errors may arise if queries are
+	 * allowed to be made before tables are finished building.
+	 *
+	 * @return boolean
+	 */
+	public static function tableBuildInProgress() {
+		return self::$table_build_in_progress;
+	}
+	protected static function setTableBuildInProgress($bool) {
+		self::$table_build_in_progress = $bool;
 	}
 
 	/**
@@ -172,6 +187,9 @@ class DatabaseAdmin extends Controller {
 	 * @param boolean $populate Populate the database, as well as setting up its schema
 	 */
 	public function doBuild($quiet = false, $populate = true, $testMode = false) {
+
+		self::setTableBuildInProgress(true);
+
 		if($quiet) {
 			DB::quiet();
 		} else {
@@ -245,6 +263,8 @@ class DatabaseAdmin extends Controller {
 			}
 		});
 		ClassInfo::reset_db_cache();
+
+		self::setTableBuildInProgress(false);
 
 		if($populate) {
 			if(!$quiet) {

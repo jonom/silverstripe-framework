@@ -1142,6 +1142,9 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	 * @return DataObject $this
 	 */
 	public function populateDefaults() {
+		// Prevent SQL errors during build
+		if (DatabaseAdmin::tableBuildInProgress()) return false;
+
 		$classes = array_reverse(ClassInfo::ancestry($this));
 
 		foreach($classes as $class) {
