@@ -31,6 +31,20 @@ class DataObjectTest extends SapphireTest {
 		'DataObjectTest_Bogey',
 	);
 
+	public function testSingleton() {
+		// Test that populateDefaults() isn't called on singletons (which can cause SQL errors during build)
+		$singleton1 = singleton('DataObjectTest_Fixture');
+		$singleton2 = DataObjectTest_Fixture::singleton();
+		$inst = DataObjectTest_Fixture::create();
+		//print_r($inst); exit; // ToDo: Objects created with injector aren't getting defaults set.
+		$this->assertEquals('Default Value', $inst->MyFieldWithDefault);
+		$this->assertEquals('Default Value', $inst->MyFieldWithAltDefault);
+		$this->assertEmpty($singleton1->MyFieldWithDefault);
+		$this->assertEmpty($singleton1->MyFieldWithAltDefault);
+		$this->assertEmpty($singleton2->MyFieldWithDefault);
+		$this->assertEmpty($singleton2->MyFieldWithAltDefault);
+	}
+
 	public function testDb() {
 		$obj = new DataObjectTest_TeamComment();
 		$dbFields = $obj->db();
@@ -1107,7 +1121,7 @@ class DataObjectTest extends SapphireTest {
 
 	public function testValidateModelDefinitionsFailsWithArray() {
 		Config::nest();
-		
+
 		$object = new DataObjectTest_Team;
 		$method = $this->makeAccessible($object, 'validateModelDefinitions');
 
@@ -1124,7 +1138,7 @@ class DataObjectTest extends SapphireTest {
 
 	public function testValidateModelDefinitionsFailsWithIntKey() {
 		Config::nest();
-		
+
 		$object = new DataObjectTest_Team;
 		$method = $this->makeAccessible($object, 'validateModelDefinitions');
 
@@ -1141,7 +1155,7 @@ class DataObjectTest extends SapphireTest {
 
 	public function testValidateModelDefinitionsFailsWithIntValue() {
 		Config::nest();
-		
+
 		$object = new DataObjectTest_Team;
 		$method = $this->makeAccessible($object, 'validateModelDefinitions');
 
@@ -1161,7 +1175,7 @@ class DataObjectTest extends SapphireTest {
 	 */
 	public function testValidateModelDefinitionsPassesWithExtraFields() {
 		Config::nest();
-		
+
 		$object = new DataObjectTest_Team;
 		$method = $this->makeAccessible($object, 'validateModelDefinitions');
 
@@ -1808,7 +1822,7 @@ class DataObjectTest_SubTeam extends DataObjectTest_Team implements TestOnly {
 	private static $many_many = array(
 		'FormerPlayers' => 'DataObjectTest_Player'
 	);
-	
+
 	private static $many_many_extraFields = array(
 		'FormerPlayers' => array(
 			'Position' => 'Varchar(100)'
