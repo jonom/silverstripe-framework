@@ -24,6 +24,7 @@ class ChangePasswordForm extends Form {
 			$backURL = $_REQUEST['BackURL'];
 		} else {
 			$backURL = Session::get('BackURL');
+			Session::clear('BackURL');
 		}
 
 		if(!$fields) {
@@ -99,8 +100,6 @@ class ChangePasswordForm extends Form {
 			$isValid = $member->changePassword($data['NewPassword1']);
 			if($isValid->valid()) {
 				$member->logIn();
-
-				// TODO Add confirmation message to login redirect
 				Session::clear('AutoLoginHash');
 
 				// Clear locked out status
@@ -108,21 +107,23 @@ class ChangePasswordForm extends Form {
 				$member->FailedLoginCount = null;
 				$member->write();
 
+				$sessionMsg = _t(
+					'Member.PASSWORDCHANGED',
+					"Your password was successfully changed."
+				);
 				if (!empty($_REQUEST['BackURL'])
 					// absolute redirection URLs may cause spoofing
 					&& Director::is_site_url($_REQUEST['BackURL'])
 				) {
-					$url = Director::absoluteURL($_REQUEST['BackURL']);
-					return $this->controller->redirect($url);
+					$url = Director::makeRelative($_REQUEST['BackURL']);
+					$sessionMsg.=  ' ' . _t(
+						'Member.PASSWORDCHANGEDCONTINUE',
+						'You can now continue to'
+					) . ' <a href="' . $url . '"><em>' . Convert::raw2xml($url) . '</em></a>';
 				}
-				else {
-					// Redirect to default location - the login form saying "You are logged in as..."
-					$redirectURL = HTTP::setGetVar(
-						'BackURL',
-						Director::absoluteBaseURL(), $this->controller->Link('login')
-					);
-					return $this->controller->redirect($redirectURL);
-				}
+				$this->sessionMessage($sessionMsg, 'good', false);
+				// redirect back to the form, instead of using redirectBack() which could send the user elsewhere.
+				return $this->controller->redirect($this->controller->Link('changepassword'));
 			} else {
 				$this->clearMessage();
 				$this->sessionMessage(
