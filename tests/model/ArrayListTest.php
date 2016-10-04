@@ -314,11 +314,7 @@ class ArrayListTest extends SapphireTest {
 		), $list->toArray());
 	}
 
-	public function testNaturalSort() {
-		//natural sort is only available in 5.4+
-		if (version_compare(phpversion(), '5.4.0', '<')) {
-			$this->markTestSkipped();
-		}
+	public function testMixedCaseSort() {
 		$list = new ArrayList(array(
 		array('Name' => 'Steve'),
 			(object) array('Name' => 'Bob'),
@@ -335,8 +331,8 @@ class ArrayListTest extends SapphireTest {
             (object) array('Name' => 'Bob'),
             array('Name' => 'bonny'),
             array('Name' => 'bonny1'),
-            array('Name' => 'bonny2'),
             array('Name' => 'bonny10'),
+            array('Name' => 'bonny2'),
             array('Name' => 'John'),
             array('Name' => 'Steve'),
         ), $list1->toArray());
@@ -347,8 +343,8 @@ class ArrayListTest extends SapphireTest {
             (object) array('Name' => 'Bob'),
             array('Name' => 'bonny'),
             array('Name' => 'bonny1'),
-            array('Name' => 'bonny2'),
             array('Name' => 'bonny10'),
+            array('Name' => 'bonny2'),
             array('Name' => 'John'),
             array('Name' => 'Steve'),
         ), $list2->toArray());
@@ -359,8 +355,8 @@ class ArrayListTest extends SapphireTest {
 	        (object) array('Name' => 'Bob'),
 	        array('Name' => 'bonny'),
 	        array('Name' => 'bonny1'),
-	        array('Name' => 'bonny2'),
 	        array('Name' => 'bonny10'),
+	        array('Name' => 'bonny2'),
 	        array('Name' => 'John'),
 	        array('Name' => 'Steve'),
 	    ), $list3->toArray());
@@ -470,6 +466,42 @@ class ArrayListTest extends SapphireTest {
 			(object) array('Name' => 'Bob'),
 			array('Name' => 'John')
 		));
+	}
+
+	public function testSortNumeric() {
+		$list = new ArrayList(array(
+			array('Sort' => 0),
+			array('Sort' => -1),
+			array('Sort' => 1),
+			array('Sort' => -2),
+			array('Sort' => 2),
+			array('Sort' => -10),
+			array('Sort' => 10)
+		));
+
+		// Sort descending
+		$list1 = $list->sort('Sort', 'DESC');
+		$this->assertEquals(array(
+			array('Sort' => 10),
+			array('Sort' => 2),
+			array('Sort' => 1),
+			array('Sort' => 0),
+			array('Sort' => -1),
+			array('Sort' => -2),
+			array('Sort' => -10)
+		), $list1->toArray());
+
+		// Sort ascending
+		$list1 = $list->sort('Sort', 'ASC');
+		$this->assertEquals(array(
+			array('Sort' => -10),
+			array('Sort' => -2),
+			array('Sort' => -1),
+			array('Sort' => 0),
+			array('Sort' => 1),
+			array('Sort' => 2),
+			array('Sort' => 10)
+		), $list1->toArray());
 	}
 
 	public function testReverse() {
