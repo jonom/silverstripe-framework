@@ -201,7 +201,7 @@ methods `getField()` and `setField()` are used to set column data.  They save to
 We can overload the default behavior by making a function called "get`<fieldname>`" or "set`<fieldname>`".
 
 The following example will use the result of `getStatus` instead of the 'Status' database column. We can refer to the
-database column using `dbObject`.
+database column using `getField`.
 
 	:::php
 	<?php
@@ -213,7 +213,7 @@ database column using `dbObject`.
 	  );
 
 	  public function getStatus() {
-	      return (!$this->obj("Birthday")->InPast()) ? "Unborn" : $this->dbObject('Status')->Value();
+	      return (!$this->obj("Birthday")->InPast()) ? "Unborn" : $this->getField('Status')->Value();
 	  }
 
 
